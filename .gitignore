@@ -3,3 +3,15 @@
 
 # Packaging
 .cask
+
+#general emacs stuff
+cache/*
+.emacs.desktop
+.emacs.desktop.lock
+auto-save-list/
+company-statistics-cache.*
+elpa/*
+*.*~
+server/
+smex-items
+emacs_backtrace.txt
