@@ -322,17 +322,23 @@
   (require 'smartparens-config)
   (show-smartparens-global-mode +1)
   (sp-local-pair 'minibuffer-inactive-mode "'" nil :actions nil)
-  (defun spacemacs/smartparens-pair-newline (id action context)
-    (save-excursion
-      (newline)
-      (indent-according-to-mode)))
-  (defun spacemacs/smartparens-pair-newline-and-indent (id action context)
-    (spacemacs/smartparens-pair-newline id action context)
-    (indent-according-to-mode))
-  (sp-pair "{" nil :post-handlers
-	   '(:add (spacemacs/smartparens-pair-newline-and-indent "RET")))
-  (sp-pair "[" nil :post-handlers
-	   '(:add (spacemacs/smartparens-pair-newline-and-indent "RET"))))
+  (general-define-key :maps 'smartparens-mode-map
+		      "C-<right>" 'sp-forward-slurp-sexp
+		      "C-<left>" 'sp-forward-barf-sexp
+		      "C-M-<left>" 'sp-backward-slup-sexp
+		      "C-M-<right>" 'sp-backward-barf-sexp))
+  ;; (defun spacemacs/smartparens-pair-newline (id action context)
+  ;;   (save-excursion
+  ;;     (newline)
+  ;;     (indent-according-to-mode)))
+  ;; (defun spacemacs/smartparens-pair-newline-and-indent (id action context)
+  ;;   (spacemacs/smartparens-pair-newline id action context)
+  ;;   (indent-according-to-mode))
+  ;; (sp-pair "{" nil :post-handlers
+  ;; 	   '(:add (spacemacs/smartparens-pair-newline-and-indent "RET")))
+  ;; (sp-pair "[" nil :post-handlers
+  ;; 	   '(:add (spacemacs/smartparens-pair-newline-and-indent "RET"))))
+
 
 (use-package yasnippet
   :ensure t
@@ -546,7 +552,10 @@
   :ensure swiper
   :config
   (ivy-mode 1)
-  (setq use-ivy-virtual-buffers t))
+  (setq use-ivy-virtual-buffers t)
+  :config
+  (nmap :prefix evil-leader
+        "xb" 'ivy-switch-buffer))
 
 (use-package counsel
   :ensure t
@@ -724,9 +733,10 @@
   :ensure t
   :config
     (global-evil-surround-mode 1)
-    (general-define-key :keymaps 'surround
-			"s" 'evil-surround-region
-			"S" 'evil-substitute))
+    (general-define-key :prefix evil-leader
+			:keymaps 'surround
+			"sr" 'evil-surround-region
+			"Sr" 'evil-substitute))
     ;; (evil-define-key 'visual evil-surround-mode-map "s" 'evil-surround-region)
     ;; (evil-define-key 'visual evil-surround-mode-map "S" 'evil-substitute))
 
@@ -770,7 +780,7 @@
   (setq avy-keys (number-sequence ?a ?z))
   (setq avy-all-windows 'all-frames)
   (setq avy-background t)
-  (nmap :prefix "SPC"
+  (nmap :prefix evil-leader
 	"SPC" 'avy-goto-word-or-subword-1
 	"l" 'avy-goto-line
 	"`" 'avy-pop-mark))
@@ -1050,23 +1060,22 @@
   :config
   (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'clojure-mode-hook #'smartparens-mode)
+  (add-hook 'clojure-mode-hook #'turn-on-smartparens-strict-mode)
   (nmap :prefix evil-leader "wpb" 'popwin:popup-buffer  )
   (popwin:popup-buffer "*cider-test-report*")
-  (general-define-key :keymaps 'cider-mode-map
-		      :states 'normal
-		      :prefix evil-command
-		      "" 'cider-jack-in
-		      "ee" 'cider-eval-last-sexp
-		      "ef" 'cider-eval-defun-at-point
-		      "er" 'cider-eval-region
-		      "em" 'cider-macroexpand-1
-		      "eM" 'cider-macroexpand-all
-		      "ew" 'cider-eval-last-sexp-and-replace
-		      "cz" 'cider-switch-to-repl-buffer)
-  (general-define-key :keymap 'cider-repl-mode-map
-		      :states 'normal
-		      :prefix evil-leader
-		      "ccz" 'cider-switch-to-last-clojure-buffer))
+  (nmap :keymaps 'cider-mode-map
+        :prefix evil-command
+        "cji" 'cider-jack-in
+        "ee" 'cider-eval-last-sexp
+        "ef" 'cider-eval-defun-at-point
+        "er" 'cider-eval-region
+        "em" 'cider-macroexpand-1
+        "eM" 'cider-macroexpand-all
+        "ew" 'cider-eval-last-sexp-and-replace
+        "cz" 'cider-switch-to-repl-buffer)
+  (nmap :keymap 'cider-repl-mode-map
+        :prefix evil-leader
+        "ccz" 'cider-switch-to-last-clojure-buffer))
 
 (defun evil--cider-preceding-sexp (command &rest args)
   "In normal-state or motion-state, cider-last-sexp ends at point."
