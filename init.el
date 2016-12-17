@@ -9,7 +9,7 @@
  '(flycheck-racket-executable "/usr/local/bin/racket")
  '(package-selected-packages
    (quote
-    (counsel ivy-smex smex swiper xcscope aggressive-indent auto-highlight-symbol clean-aindent-mode popwin popup company-statistics company yasnippet powerline base16-theme sublimity smooth-scroll company-auctex ahk-mode cider clojure-mode paredit clang-format cmake-mode evil-search-highlight-persist evil-matchit evil-org-mode flycheck-ycmd vi-tilde-fringe volatile-highlights define-word expand-region google-translate highlight-parentheses highlight-numbers highlight-indentation indent-guide open-junk-file rainbow-delimiters ace-window ace-link electric-indent-mode page-break-lines fill-column-indicator exec-path-from-shell srefactor helm-gtags helm-cscope company-c-headers disaster stickyfunc-enhance stickyfunc-enhace helm cmake-font-lock whitespace-cleanup-mode use-package smartparens racket-mode pyenv-mode key-chord irony-eldoc hlinum haskell-mode geiser flycheck-irony evil-numbers evil-nerd-commenter evil-leader evil-args company-ycmd company-irony company-anaconda atom-one-dark-theme)))
+    (smeargle orgit git-timemachine git-messenger git-link gitconfig-mode gitattributes-mode gitignore-mode evil-magit cider-eval-sexp-fu eval-sexp-fu counsel ivy-smex smex swiper xcscope aggressive-indent auto-highlight-symbol clean-aindent-mode popwin popup company-statistics company yasnippet powerline base16-theme sublimity smooth-scroll company-auctex ahk-mode cider clojure-mode paredit clang-format cmake-mode evil-search-highlight-persist evil-matchit evil-org-mode flycheck-ycmd vi-tilde-fringe volatile-highlights define-word expand-region google-translate highlight-parentheses highlight-numbers highlight-indentation indent-guide open-junk-file rainbow-delimiters ace-window ace-link electric-indent-mode page-break-lines fill-column-indicator exec-path-from-shell srefactor helm-gtags helm-cscope company-c-headers disaster stickyfunc-enhance stickyfunc-enhace helm cmake-font-lock whitespace-cleanup-mode use-package smartparens racket-mode pyenv-mode key-chord irony-eldoc hlinum haskell-mode geiser flycheck-irony evil-numbers evil-nerd-commenter evil-leader evil-args company-ycmd company-irony company-anaconda atom-one-dark-theme)))
  '(safe-local-variable-values (quote ((Tex-master . "syllabus")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -123,6 +123,7 @@
   :config
   (general-evil-setup t)
   (setq evil-leader "SPC")
+  (setq evil-command ",")
   (imap "C-c" 'evil-normal-state)
   (vmap "C-c" 'evil-normal-state)
   (nmap :prefix evil-leader "mx" 'execute-extended-command)
@@ -388,8 +389,17 @@
 	"po" 'projectile-multi-occur
 	"pR" 'projectile-replace
 	"pT" 'projectile-find-test-file
-	"py" 'projectile-find-tag)
-  (projectile-global-mode))
+	"py" 'projectile-find-tag
+	"pp" 'projectile-switch-project
+	"pb" 'projectile-switch-to-buffer
+	"pd" 'projectile-find-dir
+	"pf" 'projectile-find-file
+	"ph" 'projectile
+	"pr" 'projectile-recentf
+	"pv" 'projectile-vc
+	"pgp" 'projectile-grep)
+  (projectile-global-mode)
+  (setq projectile-completion-system 'ivy))
 
 (use-package page-break-lines
   :ensure t
@@ -397,7 +407,53 @@
   (global-page-break-lines-mode t))
 
 (use-package magit
+  :ensure t
+  :config
+  (nmap :prefix evil-leader
+	"gS" 'magit-stage-file
+	"gM" 'magit-display-last))
+
+(use-package evil-magit
   :ensure t)
+
+(use-package gitignore-mode
+  :ensure t)
+
+(use-package gitattributes-mode
+  :ensure t)
+
+(use-package gitconfig-mode
+  :ensure t)
+
+(use-package git-link
+  :ensure t)
+
+(use-package git-messenger
+  :ensure t)
+
+(use-package git-timemachine
+  :ensure t)
+
+(use-package orgit
+  :ensure t)
+
+(use-package smeargle
+  :ensure t
+  :config
+  (nmap :prefix evil-leader
+	"svs" 'smeargle
+	"svc" 'smeargle-commits)
+  (custom-set-variables
+   '(smeargle-age-colors '((0 . nil)
+			   (1 . (plist-get zen/base16-colors :base07))
+			   (2 . (plist-get zen/base16-colors :base07))
+			   (3 . (plist-get zen/base16-colors :base07))
+			   (4 . (plist-get zen/base16-colors :base07))
+			   (5 . (plist-get zen/base16-colors :base07))
+			   (6 . (plist-get zen/base16-colors :base07))
+			   (7 . (plist-get zen/base16-colors :base07))
+			   (8 . (plist-get zen/base16-colors :base07)))))
+  (setq-default smeargle-age-threshold 1))
 
 ;; (use-package helm
 ;;   :ensure t
@@ -495,7 +551,7 @@
 (use-package counsel
   :ensure t
   :config
-  (nmap :prefix evil-leader "x" 'counsel-M-x)
+  (nmap :prefix evil-leader "xx" 'counsel-M-x)
   (general-define-key "M-x" 'counsel-M-x))
 
 (use-package popup
@@ -784,7 +840,6 @@
 ;; ;;;------------------------------------------------------------------------------
 ;; ;;;                             Lisp Section
 ;; ;;;------------------------------------------------------------------------------
-
 (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
 (add-hook 'emacs-lisp-mode-hook (lambda () (hl-line-mode t)))
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
@@ -989,15 +1044,40 @@
 ;; ;;;------------------------------------------------------------------------------
 ;; ;;;                             Clojure Section
 ;; ;;;------------------------------------------------------------------------------
-
 (use-package clojure-mode
-  :ensure t
-  :mode "//.clj//'"
+  :ensure 
+  :mode "//.clj//'" "//.boot//'"
   :config
   (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'clojure-mode-hook #'enable-paredit-mode)
+  (add-hook 'clojure-mode-hook #'smartparens-mode)
   (nmap :prefix evil-leader "wpb" 'popwin:popup-buffer  )
-  (popwin:popup-buffer "*cider-test-report*"))
+  (popwin:popup-buffer "*cider-test-report*")
+  (general-define-key :keymaps 'cider-mode-map
+		      :states 'normal
+		      :prefix evil-command
+		      "" 'cider-jack-in
+		      "ee" 'cider-eval-last-sexp
+		      "ef" 'cider-eval-defun-at-point
+		      "er" 'cider-eval-region
+		      "em" 'cider-macroexpand-1
+		      "eM" 'cider-macroexpand-all
+		      "ew" 'cider-eval-last-sexp-and-replace
+		      "cz" 'cider-switch-to-repl-buffer)
+  (general-define-key :keymap 'cider-repl-mode-map
+		      :states 'normal
+		      :prefix evil-leader
+		      "ccz" 'cider-switch-to-last-clojure-buffer))
+
+(defun evil--cider-preceding-sexp (command &rest args)
+  "In normal-state or motion-state, cider-last-sexp ends at point."
+  (if (and (not evil-move-beyond-eol)
+	   (or (evil-normal-state-p) (evil-motion-state-p)))
+      (save-excursion
+	(unless (or (eobp) (eolp)) (forward-char))
+	(apply command args))
+    (apply command args)))
+
+(advice-add 'cider-last-sexp :around #'evil--cider-preceding-sexp)
 
 ;; (use-package clojurec-mode)
 
