@@ -9,8 +9,19 @@
  '(flycheck-racket-executable "/usr/local/bin/racket")
  '(package-selected-packages
    (quote
-    (smeargle orgit git-timemachine git-messenger git-link gitconfig-mode gitattributes-mode gitignore-mode evil-magit cider-eval-sexp-fu eval-sexp-fu counsel ivy-smex smex swiper xcscope aggressive-indent auto-highlight-symbol clean-aindent-mode popwin popup company-statistics company yasnippet powerline base16-theme sublimity smooth-scroll company-auctex ahk-mode cider clojure-mode paredit clang-format cmake-mode evil-search-highlight-persist evil-matchit evil-org-mode flycheck-ycmd vi-tilde-fringe volatile-highlights define-word expand-region google-translate highlight-parentheses highlight-numbers highlight-indentation indent-guide open-junk-file rainbow-delimiters ace-window ace-link electric-indent-mode page-break-lines fill-column-indicator exec-path-from-shell srefactor helm-gtags helm-cscope company-c-headers disaster stickyfunc-enhance stickyfunc-enhace helm cmake-font-lock whitespace-cleanup-mode use-package smartparens racket-mode pyenv-mode key-chord irony-eldoc hlinum haskell-mode geiser flycheck-irony evil-numbers evil-nerd-commenter evil-leader evil-args company-ycmd company-irony company-anaconda atom-one-dark-theme)))
- '(safe-local-variable-values (quote ((Tex-master . "syllabus")))))
+    (literate-coffee-mode coffee-mode litterate-coffee-mode sass-mode gold-mode js2-mode web-mode lorem-ipsum smeargle orgit git-timemachine git-messenger git-link gitconfig-mode gitattributes-mode gitignore-mode evil-magit cider-eval-sexp-fu eval-sexp-fu counsel ivy-smex smex swiper xcscope aggressive-indent auto-highlight-symbol clean-aindent-mode popwin popup company-statistics company yasnippet powerline base16-theme sublimity smooth-scroll company-auctex ahk-mode cider clojure-mode paredit clang-format cmake-mode evil-search-highlight-persist evil-matchit evil-org-mode flycheck-ycmd vi-tilde-fringe volatile-highlights define-word expand-region google-translate highlight-parentheses highlight-numbers highlight-indentation indent-guide open-junk-file rainbow-delimiters ace-window ace-link electric-indent-mode page-break-lines fill-column-indicator exec-path-from-shell srefactor helm-gtags helm-cscope company-c-headers disaster stickyfunc-enhance stickyfunc-enhace helm cmake-font-lock whitespace-cleanup-mode use-package smartparens racket-mode pyenv-mode key-chord irony-eldoc hlinum haskell-mode geiser flycheck-irony evil-numbers evil-nerd-commenter evil-leader evil-args company-ycmd company-irony company-anaconda atom-one-dark-theme)))
+ '(safe-local-variable-values (quote ((Tex-master . "syllabus"))))
+ '(smeargle-age-colors
+   (quote
+    ((0)
+     (1 plist-get zen/base16-colors :base07)
+     (2 plist-get zen/base16-colors :base07)
+     (3 plist-get zen/base16-colors :base07)
+     (4 plist-get zen/base16-colors :base07)
+     (5 plist-get zen/base16-colors :base07)
+     (6 plist-get zen/base16-colors :base07)
+     (7 plist-get zen/base16-colors :base07)
+     (8 plist-get zen/base16-colors :base07)))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1055,27 +1066,29 @@
 ;; ;;;                             Clojure Section
 ;; ;;;------------------------------------------------------------------------------
 (use-package clojure-mode
-  :ensure 
-  :mode "//.clj//'" "//.boot//'"
-  :config
-  (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'clojure-mode-hook #'smartparens-mode)
-  (add-hook 'clojure-mode-hook #'turn-on-smartparens-strict-mode)
-  (nmap :prefix evil-leader "wpb" 'popwin:popup-buffer  )
-  (popwin:popup-buffer "*cider-test-report*")
-  (nmap :keymaps 'cider-mode-map
-        :prefix evil-command
-        "cji" 'cider-jack-in
-        "ee" 'cider-eval-last-sexp
-        "ef" 'cider-eval-defun-at-point
-        "er" 'cider-eval-region
-        "em" 'cider-macroexpand-1
-        "eM" 'cider-macroexpand-all
-        "ew" 'cider-eval-last-sexp-and-replace
-        "cz" 'cider-switch-to-repl-buffer)
-  (nmap :keymap 'cider-repl-mode-map
-        :prefix evil-leader
-        "ccz" 'cider-switch-to-last-clojure-buffer))
+             :ensure
+             :mode "\\.clj\\'" "\\.boot\\'"
+             :config
+             (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
+             (add-hook 'clojure-mode-hook #'smartparens-mode)
+             (add-hook 'clojure-mode-hook #'turn-on-smartparens-strict-mode)
+             (nmap :prefix evil-leader "wpb" 'popwin:popup-buffer  )
+             (popwin:popup-buffer "*cider-test-report*")
+             (general-define-keys :states '(normal)
+                                  :keymaps 'cider-mode-map
+                                  :prefix evil-command
+                                  "cji" 'cider-jack-in
+                                  "ee" 'cider-eval-last-sexp
+                                  "ef" 'cider-eval-defun-at-point
+                                  "er" 'cider-eval-region
+                                  "em" 'cider-macroexpand-1
+                                  "eM" 'cider-macroexpand-all
+                                  "ew" 'cider-eval-last-sexp-and-replace
+                                  "cz" 'cider-switch-to-repl-buffer)
+             (general-define-keys :states '(normal)
+                                  :keymap 'cider-repl-mode-map
+                                  :prefix evil-command
+                                  "cz" 'cider-switch-to-last-clojure-buffer))
 
 (defun evil--cider-preceding-sexp (command &rest args)
   "In normal-state or motion-state, cider-last-sexp ends at point."
@@ -1206,5 +1219,47 @@
 ;; (setq org-latex-create-formula-image-program 'dvipng)
 (setq org-preview-latex-default-process 'dvipng)
 (require 'ox)
-;;; init.el ends here
 (put 'downcase-region 'disabled nil)
+
+;;;------------------------------------------------------------------------------
+;;;                            Web Section
+;;;------------------------------------------------------------------------------
+(use-package lorem-ipsum
+  :ensure t)
+
+(use-package web-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.phtml'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.tpl\\.php'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.[agj]sp'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.as[cp]x'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.erb'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.mustache'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.djhtml'" . web-mode)))
+
+(use-package js2-mode
+  :ensure t)
+
+(use-package gold-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.ace'" . gold-mode)))
+
+(use-package sass-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.sass'" . sass-mode)))
+
+
+;;;------------------------------------------------------------------------------
+;;;			Coffee Script Section
+;;;------------------------------------------------------------------------------
+
+(use-package coffee-mode
+  :ensure t)
+
+(use-package literate-coffee-mode
+  :ensure t)
+
+;;; init.el ends here
