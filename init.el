@@ -566,7 +566,8 @@
   (setq use-ivy-virtual-buffers t)
   :config
   (nmap :prefix evil-leader
-        "xb" 'ivy-switch-buffer))
+        "ixb" 'ivy-switch-buffer))
+
 
 (use-package counsel
   :ensure t
@@ -1122,8 +1123,8 @@
 ;;;------------------------------------------------------------------------------
 ;;;                             Latex Section
 ;;;------------------------------------------------------------------------------
-(use-package tex-mik
-  :if (or (eq system-type 'ms-dos) (eq system-type 'windows-nt)))
+;; (use-package tex-mik
+;;   :if (or (eq system-type 'ms-dos) (eq system-type 'windows-nt)))
 
 (use-package company-auctex
   :ensure t
@@ -1186,12 +1187,58 @@
 ;;;------------------------------------------------------------------------------
 ;;;                             Org Section
 ;;;------------------------------------------------------------------------------
-(setq org-latex-classes '())
+(require 'ox-latex)
+(require 'ox-beamer)
+;;(setq org-latex-classes '())
+;;(setq org-export-latex-listing t)
+;;(setq org-export-latex-packages-alist '(("resources/syllabus")))
+
+(setf org-latex-default-packages-alist
+      (remove '("AUTO" "inputenc" t) org-latex-default-packages-alist))
+
+;; (let ((pos (cl-position '("T1" "fontenc" t) ; T1 -> utf8 for pdflatex
+;; 		     org-latex-default-packages-alist
+;; 		     :test 'equal)))
+;;   (if pos
+;;       (setf (nth pos org-latex-default-packages-alist)
+;; 	    '("" "fontspec" t))))
+
+
+
+
+(add-to-list 'org-latex-default-packages-alist '("" "fontspec" t) t)
+(add-to-list 'org-latex-packages-alist '("" "microtype" nil) t)
+(add-to-list 'org-latex-packages-alist '("" "microtype" nil) t)
+(add-to-list 'org-latex-packages-alist '("" "libertine" t) t)
+(add-to-list 'org-latex-packages-alist '("libertine" "newtxmath" t) t)
+
+(add-to-list 'org-latex-packages-alist '("" "polyglossia" nil) t)
+(add-to-list 'org-latex-packages-alist
+	     "\\setdefaultlanguage[variant=british]{english}" t)
+
+(add-to-list 'org-latex-packages-alist
+	     '("backgroundcolor=green!40" "todonotes" nil) t)
+
+(add-to-list 'org-latex-packages-alist '("" "makerobust" nil) t)
+(add-to-list 'org-latex-packages-alist "\\MakeRobustCommand\\begin" t)
+(add-to-list 'org-latex-packages-alist "\\MakeRobustCommand\\end" t)
+(add-to-list 'org-latex-packages-alist "\\MakeRobustCommand\\item" t)
+
+(setq org-latex-compiler "lualatex"
+      org-latex-bib-compiler "biber"
+      org-latex-pdf-process ; -shell-escape needed for minted
+      '("%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+	"%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+	"%latex -shell-escape -interaction nonstopmode -output-directory %o %f")
+      ;; org-latex-pdf-process '("sh -v -x texi2dvi -p -b -c -V %f") ; historical
+      ;; TODO: maybe use arara, that probably requires export changes
+      )
 
 (add-to-list 'org-latex-classes
              '("koma-article"
                "\\documentclass{scrartcl}
                  [NO-DEFAULT-PACKAGES]
+                 [PACKAGES]
                  [EXTRA]"
                ("\\section{%s}" . "\\section*{%s}")
                ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -1199,12 +1246,27 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-(setq org-latex-to-pdf-process
-	  '("latexmk -e "$pdflatex=q/xelatex -synctex=1 -interaction=nonstopmode/" -pdf %f"))
+(add-to-list 'org-latex-classes
+             '("beamer"
+               "\\documentclass\[presentation\]\{beamer\}
+[EXTRA]"
+               ("\\section\{%s\}" . "\\section*\{%s\}")
+               ("\\subsection\{%s\}" . "\\subsection*\{%s\}")
+               ("\\subsubsection\{%s\}" . "\\subsubsection*\{%s\}")))
 
-(setq org-latex-pdf-process '("latexmk -xelatex -quiet -shell-escape -pdf -output-directory=build -f %f"))
+(setq org-latex-to-pdf-process
+	  '("latexmk -e "$pdflatex=q/lualatex -synctex=1 -interaction=nonstopmode/" -pdf %f"))
+
+(setq org-latex-pdf-process '("latexmk -lualatex -quiet -shell-escape -pdf -auxdir=auxdir -outdir=build -f %f"))
 
 (setq-default TeX-master nil)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . c)
+   (calc . t)))
+
+(setq-default fill-column 80)
 
 ;;;------------------------------------------------------------------------------
 ;;;                            PowerShell Section
