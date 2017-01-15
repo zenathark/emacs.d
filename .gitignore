@@ -15,3 +15,4 @@ elpa/*
 server/
 smex-items
 emacs_backtrace.txt
+*.eld*
